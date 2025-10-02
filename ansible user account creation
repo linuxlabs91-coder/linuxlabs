@@ -1,0 +1,12 @@
+---
+ - name: testing playbook
+   host: all
+   state:
+   gather_facts: false
+   vars:
+   tasks:
+     -  name: testing school playook
+        ansible.builitn.user:
+           name: test1
+           State: present
+        become: true 

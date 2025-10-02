@@ -1,4 +1,5 @@
 ---
+
 - name: Demo: Install and upgrade MuleSoft (Test)
   hosts: localhost
   become: yes
@@ -6,6 +7,18 @@
     mule_base_dir: /tmp/muleinstallation-demo
     mule_440_url: "https://s3.amazonaws.com/mulesoft-releases/releases/mule-standalone-4.4.0.tar.gz"
     mule_496_url: "https://s3.amazonaws.com/mulesoft-releases/releases/mule-standalone-4.9.6.tar.gz"
+
+- name: Enhanced Demo Playbook for AAP Testing
+  hosts: all
+  gather_facts: yes
+  become: true
+
+  vars:
+    demo_file: /tmp/demo_aap.txt
+    demo_message: "Hello from Ansible! This playbook ran successfully on {{ ansible_hostname }}."
+    demo_dir: /tmp/aap_demo_dir
+    demo_user: demo_user
+
 
   tasks:
     - name: Ensure demo base directory exists
@@ -61,4 +74,50 @@
     - name: Display demo Mule version
       debug:
         msg: "{{ mule_demo_version.stdout }}"
+
+    - name: Ensure demo user exists
+      user:
+        name: "{{ demo_user }}"
+        state: present
+        shell: /bin/bash
+
+    - name: Create a demo directory
+      file:
+        path: "{{ demo_dir }}"
+        state: directory
+        owner: "{{ demo_user }}"
+        mode: '0755'
+
+    - name: Create a demo file
+      copy:
+        dest: "{{ demo_file }}"
+        content: "{{ demo_message }}\n"
+        owner: "{{ demo_user }}"
+        mode: '0644'
+
+    - name: Install some useful test packages
+      package:
+        name:
+          - tree
+          - htop
+          - curl
+        state: present
+
+    - name: Create a simple MOTD banner
+      lineinfile:
+        path: /etc/motd
+        line: "Welcome! Ansible AAP demo ran on {{ ansible_date_time.date }}."
+        create: yes
+
+    - name: Run a simple shell command (list /tmp)
+      command: ls -l /tmp
+      register: tmp_contents
+
+    - name: Show results of /tmp directory listing
+      debug:
+        var: tmp_contents.stdout_lines
+
+    - name: Print final confirmation message
+      debug:
+        msg: "✅ Demo playbook completed successfully on {{ ansible_hostname }}!"
 

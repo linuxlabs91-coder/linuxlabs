@@ -1,0 +1,19 @@
+---
+- name: Demo Playbook for AAP Testing
+  hosts: all
+  gather_facts: yes
+  become: true
+
+  vars:
+    demo_file: /tmp/demo_aap.txt
+    demo_message: "Hello! This playbook ran successfully on {{ ansible_hostname }}."
+
+  tasks:
+    - name: Show basic system facts
+      debug:
+        msg:
+          - "OS: {{ ansible_distribution }} {{ ansible_distribution_version }}"
+          - "Hostname: {{ ansible_hostname }}"
+          - "Kernel: {{ ansible_kernel }}"
+
+    - name: Create a demo file
